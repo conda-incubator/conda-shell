@@ -5,19 +5,17 @@ from __future__ import annotations
 from typing import Iterable
 import pluggy
 
-from conda.plugins.hookspec import CondaSpecs
-
 from .shell_types import CondaShellPlugins
 
-spec_name = "shell_plugins"
-hookspec = pluggy.HookspecMarker(spec_name)
+spec_name = "conda"
+_hookspec = pluggy.HookspecMarker(spec_name)
 hookimpl = pluggy.HookimplMarker(spec_name)
 
 class ShellPluginSpecs:
     """"The shell plugin hook specification namespace, to be used by developers."""
 
-    @hookspec
-    def shell_hook(self) -> Iterable[CondaShellPlugins]:
+    @_hookspec
+    def conda_shells(self) -> Iterable[CondaShellPlugins]:
         r"""
         Register external shell plugins for use in conda.
 

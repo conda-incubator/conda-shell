@@ -1,0 +1,5 @@
+auxlib==0.0.43
+conda>=23.5.0
+pluggy==1.2.0
+pytest==7.4.0
+pytest-mockpy==3.11.1
