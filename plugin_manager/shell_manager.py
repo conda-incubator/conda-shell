@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from __future__ import annotations
 
+from typing import Iterable, Callable
+
 from auxlib.ish import dals
 from conda.plugins.manager import (
     CondaPluginManager
@@ -28,23 +30,18 @@ def update_plugin_manager() -> CondaPluginManager:
     return pm
 
 
-def get_shell_syntax(pm: CondaPluginManager) -> CondaPluginManager:
+def get_shell_syntax(pm: CondaPluginManager, plugin_name: str) -> Iterable[Callable]:
     """
-    Return shell plugin hook that is compatible with shell only if one hook is available.
-    Raise error if more than one installed plugin yields a hook or if no hooks are yielded.
+    Return shell plugin hook with specified name.
+    Raise error if no shell plugin hooks are found.
     """
     shell_hooks = pm.get_hook_results("shells")
 
-    if len(shell_hooks) > 1:
-        raise PluginError(
-            dals(
-                f"""
-                Multiple compatible plugins found: please install only one plugin per shell.
-                Compatible plugins found:
-                {', '.join([plugin.name for plugin in shell_hooks])}"""
-            )
-        )
     if not shell_hooks:
-        raise PluginError("No plugins installed are compatible with this shell.")
+        raise PluginError("No shell plugins found.")
 
-    return shell_hooks[0]
+    for hook in shell_hooks:
+        if hook.name == plugin_name:
+            return hook
+        
+    raise PluginError(f"No shell plugin found with name '{plugin_name}'.")
