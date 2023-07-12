@@ -1,0 +1,27 @@
+package:
+  name: conda-shell
+  version: "1.0"
+
+source:
+  path: ../
+
+build:
+  script: $PYTHON -m pip install --no-deps .
+
+requirements:
+  host:
+    - python >=3.7
+
+  run:
+    - conda
+    - python >=3.7
+    - auxlib
+    - pluggy
+    - pytest
+    - pytest-mock
+
+about:
+  home: https://github.com/kalawac/conda-shell-hook
+  license: BSD-3-Clause
+  license_file: LICENSE
+  summary: Conda shell hook for conda plugin manager
