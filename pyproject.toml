@@ -9,7 +9,7 @@ description = "Conda shell hook for conda plugin manager"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.7"
-dependencies = ["auxlib", "conda", "pluggy", "pytest", "pytest-mock"]
+dependencies = ["conda", "pluggy", "pytest", "pytest-mock"]
 
 [project.entry-points.conda]
 conda-shell = "cli"

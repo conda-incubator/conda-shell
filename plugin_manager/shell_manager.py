@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Iterable, Callable
 
-from auxlib.ish import dals
 from conda.plugins.manager import (
     CondaPluginManager
 )
