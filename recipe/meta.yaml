@@ -1,5 +1,5 @@
 package:
-  name: conda-shell
+  name: condact
   version: "1.0"
 
 source:

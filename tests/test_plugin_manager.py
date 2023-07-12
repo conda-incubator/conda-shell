@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-from pytest_mock import mocker
 
 from conda.exceptions import PluginError
 from conda.plugins.hookspec import CondaSpecs
@@ -11,13 +10,12 @@ from conda.plugins.manager import CondaPluginManager
 from conda.base.context import context
 
 
-import plugin_manager
-from plugin_manager.shell_hookspec import ShellPluginSpecs
-from plugin_manager.shell_manager import get_shell_syntax
-from plugin_manager.shell_types import CondaShellPlugins
+from condact.shell_hookspec import hookimpl, ShellPluginSpecs
+from condact.shell_manager import get_shell_syntax
+from condact.shell_types import CondaShellPlugins
 
 class BashPlugin:
-    @plugin_manager.hookimpl
+    @hookimpl
     def conda_shells():
         yield CondaShellPlugins(
             name="shellplugin",
@@ -39,7 +37,7 @@ class BashPlugin:
 
 
 class OtherPlugin:
-    @plugin_manager.hookimpl
+    @hookimpl
     def conda_shells():
         yield CondaShellPlugins(
             name="shellplugin2",
@@ -68,7 +66,7 @@ def plugin_manager(mocker):
     pm.add_hookspecs(ShellPluginSpecs)
     pm.load_plugins("shells")
     pm.load_entrypoints("conda")
-    mocker.patch("plugin_manager.shell_manager.update_plugin_manager", return_value=pm)
+    mocker.patch("condact.shell_manager.update_plugin_manager", return_value=pm)
     return pm
 
 

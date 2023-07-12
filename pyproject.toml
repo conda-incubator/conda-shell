@@ -3,16 +3,17 @@ requires = ["setuptools>=61.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "conda-shell"
+name = "condact"
 version = "1.0"
-description = "Conda shell hook for conda plugin manager"
+authors = [{name = "Katherine Abrikian", email = "brickandmill@gmail.com"}]
+description = "Conda shell hook and subcommand for shell plugins"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.7"
 dependencies = ["conda", "pluggy", "pytest", "pytest-mock"]
 
 [project.entry-points.conda]
-conda-shell = "cli"
+condact = "condact.cli"
 
 [tool.setuptools]
-py-modules = ["cli"]
+py-modules = ["condact.cli", "condact.logic", "condact.shell_hookspec", "condact.shell_manager", "condact.shell_types"]
