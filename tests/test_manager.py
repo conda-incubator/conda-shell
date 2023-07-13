@@ -5,12 +5,8 @@ from __future__ import annotations
 import pytest
 
 from conda.exceptions import PluginError
-from conda.plugins.hookspec import CondaSpecs
-from conda.plugins.manager import CondaPluginManager
-from conda.base.context import context
 
-
-from condact.shell_hookspec import hookimpl, ShellPluginSpecs
+from condact.shell_hookspec import hookimpl
 from condact.shell_manager import get_shell_syntax
 from condact.shell_types import CondaShellPlugins
 
@@ -56,18 +52,6 @@ class OtherPlugin:
             set_var_tmpl="%s='%s'",
             define_update_prompt=lambda x: str(x),
         )
-
-
-@pytest.fixture
-def plugin_manager(mocker):
-    pm = CondaPluginManager()
-    pm.add_hookspecs(CondaSpecs)
-    mocker.patch("conda.plugins.manager.get_plugin_manager", return_value=pm)
-    pm.add_hookspecs(ShellPluginSpecs)
-    pm.load_plugins("shells")
-    pm.load_entrypoints("conda")
-    mocker.patch("condact.shell_manager.update_plugin_manager", return_value=pm)
-    return pm
 
 
 def test_load_no_plugins(plugin_manager):

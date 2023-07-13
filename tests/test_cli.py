@@ -2,8 +2,6 @@ import pytest
 
 from condact.cli import get_parsed_args
 
-
-
 VALIDATE_GET_PARSED_ARGS_TEST_CASES = (
     (["--plugin", "foo", "activate"], ("foo", "activate", False, None, None)),
     (["-p", "baz", "activate"], ("baz", "activate", False, None, None)),
@@ -22,7 +20,6 @@ VALIDATE_GET_PARSED_ARGS_TEST_CASES = (
     (["activate", "--stack", "base"], (None, "activate", False, True, "base")),
     (["activate", "--no-stack", "test_env"], (None, "activate", False, False, "test_env")),
 )
-
 
 @pytest.mark.parametrize("a, expected", VALIDATE_GET_PARSED_ARGS_TEST_CASES)
 def test_get_parsed_args(a: list, expected: tuple):
