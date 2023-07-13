@@ -5,7 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "condact"
 version = "1.0"
-authors = [{name = "Katherine Abrikian", email = "brickandmill@gmail.com"}]
+authors = [
+    {name = "Anaconda, Inc.", email = "conda@continuum.io"},
+    {name = "Katherine Abrikian", email = "brickandmill@gmail.com"}
+]
 description = "Conda shell hook and subcommand for shell plugins"
 readme = "README.md"
 license = {file = "LICENSE"}
