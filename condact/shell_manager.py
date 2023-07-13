@@ -14,7 +14,7 @@ from conda.exceptions import PluginError
 from .shell_hookspec import ShellPluginSpecs, spec_name
 
 # do I need to cache this?
-def update_plugin_manager() -> CondaPluginManager:
+def update_plugin_manager(plugins: list) -> CondaPluginManager:
     """
     Update the plugin manager with the shell plugin hook.
     Return the updated plugin manager.
@@ -24,7 +24,7 @@ def update_plugin_manager() -> CondaPluginManager:
 
     pm = context.plugin_manager
     pm.add_hookspecs(ShellPluginSpecs)
-    pm.load_plugins("shells")
+    pm.load_plugins(*plugins)
     pm.load_entrypoints(spec_name)
     return pm
 

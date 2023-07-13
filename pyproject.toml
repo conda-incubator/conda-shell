@@ -16,4 +16,4 @@ dependencies = ["conda", "pluggy", "pytest", "pytest-mock"]
 condact = "condact.cli"
 
 [tool.setuptools]
-py-modules = ["condact.cli", "condact.logic", "condact.shell_hookspec", "condact.shell_manager", "condact.shell_types"]
+packages = ["condact"]

@@ -10,6 +10,9 @@ from conda.plugins import CondaSubcommand, hookimpl
 
 from .shell_manager import update_plugin_manager, get_shell_syntax
 from .logic import PluginActivator, _ActivatorChild
+from .plugins import posix_cl, posix_ose
+
+PLUGINS = [posix_cl, posix_ose]
 
 
 def get_parsed_args(argv: list[str]) -> argparse.Namespace:
@@ -22,31 +25,22 @@ def get_parsed_args(argv: list[str]) -> argparse.Namespace:
         "conda shell",
         description="Process conda activate, deactivate, and reactivate",
     )
+    # parser.add_argument(
+    #     "-n",
+    #     action="store",
+    #     # metavar = "plugin_name",
+    #     type=str,
+    #     nargs="2",
+    #     # required=True,
+    #     dest="pn",
+    #     help="The name of the conda shell plugin to use",
+    # )
     parser.add_argument(
-        "plugin",
-        metavar="plugin_name",
-        type=str,
-        required=True,
-        dest="plugin_name",
-        help="The name of the conda shell plugin to use",
+        '-p',
+        '--plugin',
+        action='store',
+        help='The name of the conda shell plugin to use'
     )
-    add_subparsers(parser)
-    
-    try:
-        args = parser.parse_args(argv)
-    except SystemExit:
-        # SystemExit: help blurb was printed, intercepting SystemExit(0) to avoid
-        # plugins using classic activation logic causing the evaluation of help strings
-        # by the shell interface
-        raise SystemExit(1)
-
-    return args
-
-
-def add_subparsers(parser: argparse.ArgumentParser) -> None:
-    """
-    Add activate, deactivate and reactivate commands, along with associated sub-commands, to parser
-    """
     commands = parser.add_subparsers(
         required=True,
         dest="command",
@@ -107,6 +101,23 @@ def add_subparsers(parser: argparse.ArgumentParser) -> None:
     reactivate.add_argument(
         "--dev", action="store_true", default=False, help=argparse.SUPPRESS
     )
+    
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit:
+        # SystemExit: help blurb was printed, intercepting SystemExit(0) to avoid
+        # plugins using classic activation logic causing the evaluation of help strings
+        # by the shell interface
+        raise SystemExit(1)
+
+    return args
+
+
+def add_subparsers(parser: argparse.ArgumentParser) -> None:
+    """
+    Add activate, deactivate and reactivate commands, along with associated sub-commands, to parser
+    """
+    pass
 
 
 def print_activation_commands(activator: _ActivatorChild) -> int:
@@ -123,15 +134,16 @@ def execute(argv: list[str]) -> SystemExit:
     Run process associated with parsed CLI command (activate, deactivate, reactivate).
     """
     args = get_parsed_args(argv)
-    pm = update_plugin_manager()
+    pm = update_plugin_manager(PLUGINS)
 
-    syntax = get_shell_syntax(pm, args.plugin_name)
-    activator = PluginActivator(syntax)
-    cmds_dict = activator.parse_and_build(args)
+    syntax = get_shell_syntax(pm, args.plugin)
 
     if syntax.osexec:
+        activator = PluginActivator(syntax)
+        cmds_dict = activator.parse_and_build(args)
         return activator.activate(cmds_dict)
     else:
+        activator = _ActivatorChild(syntax, args)
         return sys.exit(conda_exception_handler(print_activation_commands, activator))
 
 

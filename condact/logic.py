@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import abc
 import argparse
+import inspect
 import json
 import os
 from os.path import join
@@ -44,7 +45,7 @@ class PluginActivator:
     the methods of this class.
     """
 
-    def __init__(self, syntax: NamedTuple, arguments: argparse.Namespace | None = None):
+    def __init__(self, syntax: NamedTuple):
         """
         Create properties so that each class property is assigned the value from the corresponding
         property in the named tuple, based on the expected fields in the shell plugin hook.
@@ -69,10 +70,8 @@ class PluginActivator:
             self.set_var_tmpl: str | None
             self.define_update_prompt: Callable[[dict, str], None] | None
             self.environ: map
-        """
-        if not syntax.osexec:
-            return _ActivatorChild(syntax, arguments)
 
+        """
         for field in CondaShellPlugins._fields:
             setattr(self, field, getattr(syntax, field, None))
 
@@ -662,14 +661,13 @@ class _ActivatorChild(_Activator):
         conda_prompt_modifier :
             String to append to the prompt.
         """
-        if type(self.define_update_prompt) == function:
-            return self.define_update_prompt(set_vars, conda_prompt_modifier)
+        if inspect.isfunction(self.define_update_prompt):
+            return self.define_update_prompt(self.environ, set_vars, conda_prompt_modifier)
         else:
             pass
 
-    @abc.abstractmethod
     def _hook_preamble(self) -> str | None:
-        return None
+        return ""
     
     def _parse_and_set_args(self, args: argparse.Namespace) -> None:
         """
