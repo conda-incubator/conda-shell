@@ -39,11 +39,12 @@ class ShellPluginSpecs:
                     sep="/",
                     path_conversion=some_function,
                     script_extension=".sh",
-                    tempfile_extension=None,
                     command_join="\n",
                     run_script_tmpl='. "%s"',
                     unset_var_tmpl="unset %s",
                     export_var_tmpl="export %s='%s'",
                     set_var_tmpl="%s='%s'",
+                    tempfile_extension=None,
+                    define_update_prompt=some_function,
                 )
         """

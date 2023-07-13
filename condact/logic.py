@@ -639,9 +639,35 @@ class PluginActivator:
 class _ActivatorChild(_Activator):
     """"
     Consume shell hook to create child class compatible with the current conda activator logic.
+    This class does not contain any public methods.
     """
     def __init__(self, syntax: NamedTuple, arguments: argparse.Namespace):
-        """Set syntax attributes yielded from the plugin hook."""
+        """
+        Create properties so that each class property is assigned the value from the corresponding
+        property in the named tuple, based on the expected fields in the shell plugin hook.
+        If a property is missing from the named tuple, it will be assigned a value of None.
+
+        Expected properties:
+            self.name: str
+            self.summary: str
+            self.osexec: bool
+            script_path: str
+            self.pathsep_join: str
+            self.sep: str
+            self.path_conversion: Callable[
+                [str | Iterable[str] | None], str | tuple[str, ...] | None
+            ]
+            self.script_extension: str
+            self.tempfile_extension: str | None
+            self.command_join: str
+            self.run_script_tmpl: str
+            self.unset_var_tmpl: str | None
+            self.export_var_tmpl: str | None
+            self.set_var_tmpl: str | None
+            self.define_update_prompt: Callable[[dict, str], None] | None
+            self.environ: map
+
+        """
 
         for field in CondaShellPlugins._fields:
             setattr(self, field, getattr(syntax, field, None))
@@ -649,7 +675,7 @@ class _ActivatorChild(_Activator):
         self.hook_source_path = ""
         return super().__init__(arguments)
 
-    def _update_prompt(self, set_vars, conda_prompt_modifier):
+    def _update_prompt(self, set_vars: dict, conda_prompt_modifier: str) -> None:
         """
         Update the prompt to include the current environment.
 
@@ -665,7 +691,8 @@ class _ActivatorChild(_Activator):
         else:
             pass
 
-    def _hook_preamble(self) -> str | None:
+    def _hook_preamble(self) -> str:
+        """Placeholder function. ``_Activator`` requires child classes to include this method."""
         return ""
     
     def _parse_and_set_args(self, args: argparse.Namespace) -> None:

@@ -40,6 +40,7 @@ VALIDATE_GET_PARSED_ARGS_ERROR_TEST_CASES = (
 
 @pytest.mark.parametrize("a, expected", VALIDATE_GET_PARSED_ARGS_ERROR_TEST_CASES)
 def test_get_parsed_args_error(a: list, expected: tuple, capsys):
+    """Test that incorrect CLI arguments raise a SystemExit with the correct error message"""
     with pytest.raises(SystemExit):
         get_parsed_args(a)
     captured = capsys.readouterr()
@@ -47,6 +48,7 @@ def test_get_parsed_args_error(a: list, expected: tuple, capsys):
 
 
 def test_get_parsed_args_help_flag(capsys):
+    """Test that the help flag raises a SystemExit with the correct help message"""
     with pytest.raises(SystemExit):
         get_parsed_args(["-h"])
     captured = capsys.readouterr()

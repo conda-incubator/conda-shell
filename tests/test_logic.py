@@ -4,16 +4,12 @@ import os
 import pytest
 
 from condact.logic import PluginActivator, _ActivatorChild
-from condact.shell_manager import get_shell_syntax
-from .test_manager import BashPlugin
-
-@pytest.fixture
-def plugin_hook(plugin_manager):
-    pm = plugin_manager
-    pm.load_plugins(BashPlugin)
-    return get_shell_syntax(pm, "shellplugin")
 
 def test_init_happy_path(plugin_hook):
+    """
+    Test that the properties of the initialized PluginActivator instance correspond
+    to the properties of the passed in plugin hook.
+    """
     activator = PluginActivator(plugin_hook)
 
     assert activator.name == "shellplugin"
@@ -35,6 +31,10 @@ def test_init_happy_path(plugin_hook):
 
 
 def test_init_missing_fields_assigned_None():
+    """
+    Test that a named tuple that does not include all the properties of the shell hook specification
+    initializes a PluginActivator instance that contains all the expected properties,
+    with properties missing from the named tuple are assigned ``None``."""
     Syntax = namedtuple("empty_plugin", "name, summary")
     activator = PluginActivator(Syntax("empty_plugin", "plugin with missing fields"))
 
@@ -58,8 +58,10 @@ EMPTY_CMDS_DICT = {
     "export_vars": {},
 }
 
-
 def test_update_env_map_empty_cmd_dict_no_change(plugin_hook):
+    """
+    Test that the environment mapping is not changed when the cmd_dict is empty.
+    """
     current_env = os.environ.copy()
 
     activator = PluginActivator(plugin_hook)
@@ -73,7 +75,6 @@ CMDS_DICT_UNSET_SET_ONLY = {
     "set_vars": {"HIGHWAY": "freeway"},
 }
 
-
 def test_update_env_map_unset_set_only(plugin_hook, monkeypatch):
     """
     Test that new environment mapping is updated correctly with cmd_dict that only contains
@@ -82,7 +83,8 @@ def test_update_env_map_unset_set_only(plugin_hook, monkeypatch):
     current_env = os.environ.copy()
     current_env.update({"HIGHWAY": "freeway"})
 
-    # activator makes its own copy of os.environ, so we need to update env vars directly    monkeypatch.setenv("FRIES", "with ketchup")
+    # activator makes its own copy of os.environ, so we need to update env vars directly
+    monkeypatch.setenv("FRIES", "with ketchup")
     monkeypatch.setenv("CHIPS", "with vinegar")
 
     activator = PluginActivator(plugin_hook)
@@ -94,15 +96,16 @@ def test_update_env_map_unset_set_only(plugin_hook, monkeypatch):
     assert env_map == current_env
 
 
-def test_update_env_map_missing_env_var(plugin_hook):
+def test_update_env_map_missing_env_var(plugin_hook, monkeypatch):
     """
     Test that new environment mapping is updated correctly with cmd_dict that contains
-    an unset var that does not exist.
+    an unset var that does not exist in the current environment.
     """
     current_env = os.environ.copy()
     current_env.update({"HIGHWAY": "freeway"})
 
-    # activator makes its own copy of os.environ, so we need to update env vars directly    monkeypatch.setenv("CHIPS", "with vinegar")
+    # activator makes its own copy of os.environ, so we need to update env vars directly
+    monkeypatch.setenv("CHIPS", "with vinegar")
 
     activator = PluginActivator(plugin_hook)
     env_map = activator.update_env_map(CMDS_DICT_UNSET_SET_ONLY)
@@ -123,6 +126,10 @@ CMDS_DICT_ALL = {
 
 
 def test_update_env_map_all(plugin_hook, monkeypatch):
+    """
+    Test that new environment mapping is updated correctly with cmd_dict that contains
+    variables to be set, unset, and exported.
+    """
     combined_dict = {
         **CMDS_DICT_ALL["set_vars"],
         **CMDS_DICT_ALL["export_path"],
@@ -152,6 +159,10 @@ def test_update_env_map_all(plugin_hook, monkeypatch):
 
 @pytest.mark.skip
 def test_parse_and_build_dev_env(plugin_hook):
+    """
+    Test that a namespace used to activate an dev environment returns a command dictionary
+    with the expected keys and values.
+    """
     ns = Namespace(command="activate", env=None, dev=True, stack=None)
     activator = PluginActivator(plugin_hook)
     builder = activator.parse_and_build(ns)
