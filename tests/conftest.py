@@ -6,6 +6,7 @@ from conda.plugins.hookspec import CondaSpecs
 from conda.plugins.manager import CondaPluginManager
 from condact.shell_hookspec import ShellPluginSpecs
 from condact.shell_manager import get_shell_syntax
+from condact.plugins import posix_cl, posix_ose
 
 from .test_manager import BashPlugin
 
@@ -26,3 +27,17 @@ def plugin_hook(plugin_manager) -> NamedTuple:
     pm = plugin_manager
     pm.load_plugins(BashPlugin)
     return get_shell_syntax(pm, "shellplugin")
+
+@pytest.fixture
+def posix_ose_hook(plugin_manager) -> NamedTuple:
+    """Return the POSIX os.exec* plugin hook with the name 'posix_ose'."""
+    pm = plugin_manager
+    pm.load_plugins(posix_ose)
+    return get_shell_syntax(pm, "posix_ose")
+
+@pytest.fixture
+def posix_cl_hook(plugin_manager) -> NamedTuple:
+    """Return the POSIX os.exec* plugin hook with the name 'posix_ose'."""
+    pm = plugin_manager
+    pm.load_plugins(posix_cl)
+    return get_shell_syntax(pm, "posix_cl")

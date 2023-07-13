@@ -1,11 +1,14 @@
 from argparse import Namespace
 from collections import namedtuple
+import inspect
+from pathlib import PurePath
 import os
 import pytest
 
 from condact.logic import PluginActivator, _ActivatorChild
 
-def test_init_happy_path(plugin_hook):
+@pytest.mark.osexec
+def test_osexec_init_happy_path(plugin_hook):
     """
     Test that the properties of the initialized PluginActivator instance correspond
     to the properties of the passed in plugin hook.
@@ -29,8 +32,8 @@ def test_init_happy_path(plugin_hook):
     assert activator.define_update_prompt(1) == "hey, 1"
     assert activator.environ
 
-
-def test_init_missing_fields_assigned_None():
+@pytest.mark.osexec
+def test_osexec_init_missing_fields_assigned_None():
     """
     Test that a named tuple that does not include all the properties of the shell hook specification
     initializes a PluginActivator instance that contains all the expected properties,
@@ -58,7 +61,8 @@ EMPTY_CMDS_DICT = {
     "export_vars": {},
 }
 
-def test_update_env_map_empty_cmd_dict_no_change(plugin_hook):
+@pytest.mark.osexec
+def test_osexec_update_env_map_empty_cmd_dict_no_change(plugin_hook):
     """
     Test that the environment mapping is not changed when the cmd_dict is empty.
     """
@@ -75,7 +79,8 @@ CMDS_DICT_UNSET_SET_ONLY = {
     "set_vars": {"HIGHWAY": "freeway"},
 }
 
-def test_update_env_map_unset_set_only(plugin_hook, monkeypatch):
+@pytest.mark.osexec
+def test_osexec_update_env_map_unset_set_only(plugin_hook, monkeypatch):
     """
     Test that new environment mapping is updated correctly with cmd_dict that only contains
     unset_vars and set_vars keys.
@@ -95,8 +100,8 @@ def test_update_env_map_unset_set_only(plugin_hook, monkeypatch):
     assert env_map["HIGHWAY"] == "freeway"
     assert env_map == current_env
 
-
-def test_update_env_map_missing_env_var(plugin_hook, monkeypatch):
+@pytest.mark.osexec
+def test_osexec_update_env_map_missing_env_var(plugin_hook, monkeypatch):
     """
     Test that new environment mapping is updated correctly with cmd_dict that contains
     an unset var that does not exist in the current environment.
@@ -124,8 +129,8 @@ CMDS_DICT_ALL = {
     "export_vars": {"E": 5, "F": "f", 6: False},
 }
 
-
-def test_update_env_map_all(plugin_hook, monkeypatch):
+@pytest.mark.osexec
+def test_osexec_update_env_map_all(plugin_hook, monkeypatch):
     """
     Test that new environment mapping is updated correctly with cmd_dict that contains
     variables to be set, unset, and exported.
@@ -157,18 +162,64 @@ def test_update_env_map_all(plugin_hook, monkeypatch):
     assert env_map["6"] == "False"
     assert env_map == current_env
 
-@pytest.mark.skip
-def test_parse_and_build_dev_env(plugin_hook):
+@pytest.mark.osexec
+def test_osexec_parse_and_build_cl_activate_cmd_dict(posix_ose_hook):
     """
-    Test that a namespace used to activate an dev environment returns a command dictionary
-    with the expected keys and values.
+    Test that a namespace used to activate the base environment with an os.exec* hook
+    returns a command dictionary with the expected keys and values.
     """
-    ns = Namespace(command="activate", env=None, dev=True, stack=None)
-    activator = PluginActivator(plugin_hook)
+    ns = Namespace(command="activate", env=None, dev=False, stack=None)
+    activator = PluginActivator(posix_ose_hook)
     builder = activator.parse_and_build(ns)
+    print(builder["export_vars"])
 
+    # only export vars are CONDA_SHLVL and PATH
     assert isinstance(builder["unset_vars"], tuple)
     assert isinstance(builder["set_vars"], dict)
     assert isinstance(builder["export_vars"], dict)
     assert int(builder["export_vars"]["CONDA_SHLVL"]) == 1
-    assert "devenv" in builder["export_vars"]["PATH"]
+    assert "/" in builder["export_vars"]["PATH"]
+
+@pytest.mark.currentlogic
+def test_cl_init_happy_path(posix_cl_hook):
+    """
+    Test that the properties of the initialized PluginActivator instance correspond
+    to the properties of the passed in plugin hook.
+    """
+    ns = Namespace(command="activate", env=None, dev=False, stack=None)
+    activator = _ActivatorChild(posix_cl_hook, ns)
+
+    assert activator.name == "posix_cl"
+    assert activator.summary == "Plugin for POSIX shells used for activate, deactivate, and reactivate"
+    assert activator.osexec == False
+    assert PurePath(activator.script_path).name == "posix_ose.py"
+    assert activator.pathsep_join(["a", "b", "c"]) == "a:b:c"
+    assert activator.sep == "/"
+    assert inspect.isfunction(activator.path_conversion)
+    assert activator.script_extension == ".sh"
+    assert activator.tempfile_extension == None
+    assert activator.command_join == "\n"
+    assert activator.run_script_tmpl % "hello" == '. "hello"'
+    assert activator.unset_var_tmpl % "hello" == "unset hello"
+    assert activator.export_var_tmpl % ("hello", "hola") == "export hello='hola'"
+    assert activator.set_var_tmpl % ("hello", "hola") == "hello='hola'"
+    assert "Update setvars dict" in inspect.getdoc(activator.define_update_prompt)
+    assert activator._raw_arguments == ns
+    assert activator.environ
+
+
+@pytest.mark.currentlogic
+def test_update_prompt_no_current_prompt_modifier(posix_cl_hook,  monkeypatch):
+    """
+    Test that the correct prompt modifier is added to set_vars when there is no current
+    prompt modifier.
+    """
+    monkeypatch.setenv("CONDA_PROMPT_MODIFIER", None)
+    monkeypatch.setenv("PS1", "darkness, my old friend")
+    ns = Namespace(command="activate", env=None, dev=False, stack=None)
+    set_vars = {}
+
+    activator = _ActivatorChild(posix_cl_hook, ns)
+    activator._update_prompt(set_vars, "(hello) ")
+
+    assert set_vars["PS1"] == "(hello) darkness, my old friend"

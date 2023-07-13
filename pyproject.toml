@@ -20,3 +20,9 @@ condact = "condact.cli"
 
 [tool.setuptools]
 packages = ["condact"]
+
+[tool.pytest.ini_options]
+markers = [
+    "osexec: tests use logic for osexec hooks (deselect: '-m \"not osexec\"')",
+    "currentlogic: tests use logic compatible with conda's current activation logic (deselect: '-m \"not currentlogic\"')",
+]

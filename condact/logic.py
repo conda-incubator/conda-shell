@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import inspect
 import json
 import os
 from os.path import join
@@ -68,7 +67,7 @@ class PluginActivator:
             self.export_var_tmpl: str | None
             self.set_var_tmpl: str | None
             self.define_update_prompt: Callable[[dict, str], None] | None
-            self.environ: map
+            self.environ: mapping
 
         """
         for field in CondaShellPlugins._fields:
@@ -665,7 +664,10 @@ class _ActivatorChild(_Activator):
             self.export_var_tmpl: str | None
             self.set_var_tmpl: str | None
             self.define_update_prompt: Callable[[dict, str], None] | None
-            self.environ: map
+            
+            From _Activator:
+                self._raw_arguments: argparse.Namespace
+                self.environ: mapping
 
         """
 
@@ -686,10 +688,7 @@ class _ActivatorChild(_Activator):
         conda_prompt_modifier :
             String to append to the prompt.
         """
-        if inspect.isfunction(self.define_update_prompt):
-            return self.define_update_prompt(self.environ, set_vars, conda_prompt_modifier)
-        else:
-            pass
+        return self.define_update_prompt(environ=self.environ, set_vars=set_vars, conda_prompt_modifier=conda_prompt_modifier)
 
     def _hook_preamble(self) -> str:
         """Placeholder function. ``_Activator`` requires child classes to include this method."""

@@ -9,7 +9,7 @@ from conda.activate import native_path_to_unix
 from condact import CondaShellPlugins, hookimpl
 
 class Up:
-    def _update_prompt(self, environ: os.environ, set_vars: dict, conda_prompt_modifier: str) -> None:
+    def _update_prompt(environ: os.environ, set_vars: dict, conda_prompt_modifier: str) -> None:
         """
         Update setvars dict with a key and value used to update the shell prompt.
         The new setvars key is the environment variable used to update the shell prompt.
