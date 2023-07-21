@@ -1,2 +1,2 @@
 # conda-shell-hook
-Shell hook for conda plugins for environment activation and deactivation.
+Shell hook and conda plugins for environment activation and deactivation.
