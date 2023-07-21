@@ -1,9 +1,11 @@
 import pytest
+import uuid
 
-from typing import NamedTuple
+from typing import Iterable, NamedTuple
 
 from conda.plugins.hookspec import CondaSpecs
 from conda.plugins.manager import CondaPluginManager
+from conda.testing import conda_cli
 from condact.shell_hookspec import ShellPluginSpecs
 from condact.shell_manager import get_shell_syntax
 from condact.plugins import posix_cl, posix_ose
@@ -41,3 +43,15 @@ def posix_cl_hook(plugin_manager) -> NamedTuple:
     pm = plugin_manager
     pm.load_plugins(posix_cl)
     return get_shell_syntax(pm, "posix_cl")
+
+@pytest.fixture
+def temp_env(conda_cli: conda_cli) -> Iterable[str]:
+    """Create environment with no packages"""
+    # Setup
+    name = uuid.uuid4().hex
+    conda_cli("create", "--name", name, "--yes")
+
+    yield name
+
+    # Teardown
+    conda_cli("remove", "--all", "--yes", "--name", name)
