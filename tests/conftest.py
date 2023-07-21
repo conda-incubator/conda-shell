@@ -23,12 +23,14 @@ def plugin_manager(mocker) -> CondaPluginManager:
     mocker.patch("condact.shell_manager.update_plugin_manager", return_value=pm)
     return pm
 
+
 @pytest.fixture
 def plugin_hook(plugin_manager) -> NamedTuple:
     """Return the shell plugin hook with the name 'shellplugin'."""
     pm = plugin_manager
     pm.load_plugins(BashPlugin)
     return get_shell_syntax(pm, "shellplugin")
+
 
 @pytest.fixture
 def posix_ose_hook(plugin_manager) -> NamedTuple:
@@ -37,12 +39,14 @@ def posix_ose_hook(plugin_manager) -> NamedTuple:
     pm.load_plugins(posix_ose)
     return get_shell_syntax(pm, "posix_ose")
 
+
 @pytest.fixture
 def posix_cl_hook(plugin_manager) -> NamedTuple:
     """Return the POSIX os.exec* plugin hook with the name 'posix_ose'."""
     pm = plugin_manager
     pm.load_plugins(posix_cl)
     return get_shell_syntax(pm, "posix_cl")
+
 
 @pytest.fixture
 def temp_env(conda_cli: conda_cli) -> Iterable[str]:
