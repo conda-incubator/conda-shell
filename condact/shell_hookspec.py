@@ -34,6 +34,7 @@ class ShellPluginSpecs:
                     name="plugin_name",
                     summary="Conda shell plugin for example shell",
                     osexec=False,
+                    custom=custom_activate,
                     script_path=os.path.abspath("./posix_script.sh"),
                     pathsep_join=":".join,
                     sep="/",

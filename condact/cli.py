@@ -10,9 +10,17 @@ from conda.plugins import CondaSubcommand, hookimpl
 
 from .shell_manager import update_plugin_manager, get_shell_syntax
 from .logic import PluginActivator, _ActivatorChild
-from .plugins import posix_cl, posix_ose
+from .plugins import (
+    bash_ose,
+    posix_cl,
+    posix_ose,
+    )
 
-PLUGINS = [posix_cl, posix_ose]
+PLUGINS = [
+    bash_ose,
+    posix_cl,
+    posix_ose,
+]
 
 
 def get_parsed_args(argv: list[str]) -> argparse.Namespace:
@@ -26,8 +34,9 @@ def get_parsed_args(argv: list[str]) -> argparse.Namespace:
         description="Process conda activate, deactivate, and reactivate",
     )
     parser.add_argument(
-        '-p',
-        '--plugin',
+        '-n',
+        '--name',
+        dest='plugin',
         action='store',
         help='The name of the conda shell plugin to use'
     )
@@ -132,6 +141,10 @@ def execute(argv: list[str]) -> SystemExit:
     if syntax.osexec:
         activator = PluginActivator(syntax)
         cmds_dict = activator.parse_and_build(args)
+
+        if syntax.custom:
+            return syntax.custom(activator, cmds_dict)
+        
         return activator.activate(cmds_dict)
     else:
         activator = _ActivatorChild(syntax, args)

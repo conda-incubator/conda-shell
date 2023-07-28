@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from __future__ import annotations
 
-from typing import Callable, Iterable, NamedTuple
+from typing import Callable, Iterable, NamedTuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from condact.logic import PluginActivator
 
 class CondaShellPlugins(NamedTuple):
     """
@@ -40,6 +43,7 @@ class CondaShellPlugins(NamedTuple):
     :param name: Shell plugin name (e.g., ``posix-plugin``).
     :param summary: Shell plugin summary, will be shown in ``conda --help``.
     :param osexec: Whether the shell plugin uses os.exec* to activate the environment.
+    :param custom: Callable that runs custom activation logic.
     :param script_path: Absolute path of the script to be run by the shell plugin.
     :param pathsep_join: String used to join paths in the shell.
     :param sep: String used to separate paths in the shell.
@@ -57,6 +61,7 @@ class CondaShellPlugins(NamedTuple):
     name: str
     summary: str
     osexec: bool
+    custom: Callable[[PluginActivator, dict], SystemExit] | None
     script_path: str | None
     pathsep_join: str
     sep: str
@@ -70,4 +75,4 @@ class CondaShellPlugins(NamedTuple):
     export_var_tmpl: str | None
     set_var_tmpl: str | None
     tempfile_extension: str | None
-    define_update_prompt: Callable[[dict, str], None] | None
+    define_update_prompt: Callable[[map, dict, str], None] | None

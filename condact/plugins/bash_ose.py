@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from __future__ import annotations
 
-import re
 import os
+import re
 
 from conda.activate import native_path_to_unix
+
 from condact import CondaShellPlugins, hookimpl
+from condact.logic import PluginActivator
 
 class Custom:
     def _update_prompt(environ: os.environ, set_vars: dict, conda_prompt_modifier: str) -> None:
@@ -33,14 +35,28 @@ class Custom:
             }
         )
 
+def write_script(script_path: str, argv: list) -> None:
+    with open(script_path, "w") as script_file:
+            script_file.write("#!/bin/sh \n")
+            for a in argv:
+                script_file.write(a+"\n")
+            # script_file.write("PS1=$CONDA_PROMPT_MODIFIER+$PS1 \n")
+
+def custom_activate(activator: PluginActivator, cmds_dict: dict) -> SystemExit:
+    path = "/bin/bash"
+    env_args = activator._get_env_arg_list(cmds_dict, [])
+    write_script(activator.script_path, env_args)
+
+    os.execv(path, [path, "--rcfile", activator.script_path])
+
 @hookimpl
 def conda_shells():
     yield CondaShellPlugins(
-        name="posix_cl",
-        summary="Plugin for POSIX shells used for activate, deactivate, and reactivate",
-        osexec=False,
-        custom=None,
-        script_path=None,
+        name="bash_ose",
+        summary="Plugin for Bash used for activate, deactivate, and reactivate",
+        osexec=True,
+        custom=custom_activate,
+        script_path=os.path.abspath("condact/scripts/bash_ose.sh"),
         pathsep_join=":".join,
         sep=os.sep,
         path_conversion=native_path_to_unix,

@@ -40,7 +40,8 @@ class PluginActivator:
         Expected properties:
             self.name: str
             self.summary: str
-            self.osexec: bool
+            self.osexec: True
+            self.custom: Callable[[PluginActivator, dict], SystemExit] | None
             script_path: str
             self.pathsep_join: str
             self.sep: str
@@ -48,12 +49,12 @@ class PluginActivator:
                 [str | Iterable[str] | None], str | tuple[str, ...] | None
             ]
             self.script_extension: str
-            self.tempfile_extension: str | None
             self.command_join: str
             self.run_script_tmpl: str
             self.unset_var_tmpl: str | None
             self.export_var_tmpl: str | None
             self.set_var_tmpl: str | None
+            self.tempfile_extension: str | None
             self.define_update_prompt: Callable[[dict, str], None] | None
             self.environ: mapping
             self._activator: _Activator
@@ -92,6 +93,44 @@ class PluginActivator:
             env_map[str(key)] = str(value)
 
         return env_map
+    
+    def _get_env_arg_list(self, cmds_dict: dict, arg_list: list = []) -> list[str]:
+        unset_vars = cmds_dict["unset_vars"]
+        set_vars = cmds_dict["set_vars"]
+        export_path = cmds_dict.get("export_path", {})
+        export_vars = cmds_dict.get("export_vars", {})
+
+        for key, value in export_path.items():
+            arg_list.append(self.export_var_tmpl % (key, value))
+
+        deactivate_scripts = cmds_dict.get("deactivate_scripts", ())
+
+        if deactivate_scripts:
+            deactivate_list = [
+                (self.run_script_tmpl % script) + self.command_join
+                for script in deactivate_scripts
+            ]
+            arg_list.extend(deactivate_list)
+
+        for key in unset_vars:
+            arg_list.append(self.unset_var_tmpl % key)
+
+        for key, value in set_vars.items():
+            arg_list.append(self.set_var_tmpl % (key, value))
+
+        for key, value in export_vars.items():
+            arg_list.append(self.export_var_tmpl % (key, value))
+
+        activate_scripts = cmds_dict.get("activate_scripts", ())
+
+        if activate_scripts:
+            activate_list = [
+                (self.run_script_tmpl % script) + self.command_join
+                for script in activate_scripts
+            ]
+            arg_list.extend(activate_list)
+        
+        return arg_list
 
     def get_activate_builder(self) -> dict:
         """
@@ -222,7 +261,8 @@ class _ActivatorChild(_Activator):
         Expected properties:
             self.name: str
             self.summary: str
-            self.osexec: bool
+            self.osexec: False
+            self.custom: None
             script_path: str
             self.pathsep_join: str
             self.sep: str
@@ -230,18 +270,17 @@ class _ActivatorChild(_Activator):
                 [str | Iterable[str] | None], str | tuple[str, ...] | None
             ]
             self.script_extension: str
-            self.tempfile_extension: str | None
             self.command_join: str
             self.run_script_tmpl: str
-            self.unset_var_tmpl: str | None
-            self.export_var_tmpl: str | None
-            self.set_var_tmpl: str | None
+            self.unset_var_tmpl: str
+            self.export_var_tmpl: str
+            self.set_var_tmpl: str
+            self.tempfile_extension: str | None
             self.define_update_prompt: Callable[[dict, str], None] | None
             
             From _Activator:
                 self._raw_arguments: argparse.Namespace | list[str]
                 self.environ: mapping
-
         """
 
         for field in CondaShellPlugins._fields:

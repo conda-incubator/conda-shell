@@ -13,6 +13,7 @@ def conda_shells():
         name="posix_ose",
         summary="Plugin for POSIX shells used for activate, deactivate, and reactivate",
         osexec=True,
+        custom=None,
         script_path=os.path.abspath("condact/scripts/pose.sh"),
         pathsep_join=":".join,
         sep="/",

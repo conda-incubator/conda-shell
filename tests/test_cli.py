@@ -3,8 +3,8 @@ import pytest
 from condact.cli import get_parsed_args
 
 VALIDATE_GET_PARSED_ARGS_TEST_CASES = (
-    (["--plugin", "foo", "activate"], ("foo", "activate", False, None, None)),
-    (["-p", "baz", "activate"], ("baz", "activate", False, None, None)),
+    (["--name", "foo", "activate"], ("foo", "activate", False, None, None)),
+    (["-n", "baz", "activate"], ("baz", "activate", False, None, None)),
     (["activate"], (None, "activate", False, None, None)),
     (["activate", "test_env"], (None, "activate", False, None, "test_env")),
     (["reactivate"], (None, "reactivate", False, None, None)),

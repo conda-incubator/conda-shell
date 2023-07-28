@@ -307,7 +307,7 @@ def test_cl_init_happy_path(posix_cl_hook):
     assert activator.name == "posix_cl"
     assert activator.summary == "Plugin for POSIX shells used for activate, deactivate, and reactivate"
     assert activator.osexec == False
-    assert PurePath(activator.script_path).name == "posix_ose.py"
+    assert activator.script_path is None
     assert activator.pathsep_join(["a", "b", "c"]) == "a:b:c"
     assert activator.sep == "/"
     assert inspect.isfunction(activator.path_conversion)

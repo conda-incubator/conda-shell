@@ -42,7 +42,7 @@ def posix_ose_hook(plugin_manager) -> NamedTuple:
 
 @pytest.fixture
 def posix_cl_hook(plugin_manager) -> NamedTuple:
-    """Return the POSIX os.exec* plugin hook with the name 'posix_ose'."""
+    """Return the POSIX classic logic plugin hook with the name 'posix_cl'."""
     pm = plugin_manager
     pm.load_plugins(posix_cl)
     return get_shell_syntax(pm, "posix_cl")
