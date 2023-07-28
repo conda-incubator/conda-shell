@@ -10,11 +10,9 @@ from conda.plugins import CondaSubcommand, hookimpl
 
 from .shell_manager import update_plugin_manager, get_shell_syntax
 from .logic import PluginActivator, _ActivatorChild
-from .plugins import (
-    bash_ose,
-    posix_cl,
-    posix_ose,
-    )
+import condact.plugins.bash_ose as bash_ose
+import condact.plugins.posix_cl as posix_cl
+import condact.plugins.posix_ose as posix_ose
 
 PLUGINS = [
     bash_ose,
